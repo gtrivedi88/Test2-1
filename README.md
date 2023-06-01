@@ -1,5 +1,10 @@
-I had this defintion on hermetic builds: Hermetic builds refer to a build process that is isolated from external dependencies, such as network access or a file system. This makes hermetic builds more secure and reliable.
-
-SME feedback: I view hermetic builds just as being sealed off from unfettered access. This means that all required resources and dependencies MUST go through the build system. It allows the build system to ensure that it has the ability to collect, query, analyze, etc. all dependencies needed for the build. Hermetic itself does not necessarily have a direct connection to security/reliability. It might have implicit connections to it.
-
-I think the wording should be changed a little. I was just trying to figure out what the definition sources were. There are many different ways that I have sen it be defined. As an example, builds are not being isolated from external dependencies as those are still being provided by Cachi2.
+<article class="doc">
+<h1 class="page">{{{or page.title 'Page Not Found'}}}</h1>
+<div class="paragraph">
+<p>The page you&#8217;re looking for does not exist. It may have been moved. You can{{#with site.homeUrl}} return to the <a href="{{{this}}}">start page</a>, or{{/with}} follow one of the links in the navigation to the left.</p>
+</div>
+<div class="paragraph">
+<p>If you arrived on this page by clicking on a link, please notify the owner of the site that the link is broken.
+If you typed the URL of this page manually, please double check that you entered the address correctly.</p>
+</div>
+</article>
