@@ -1,68 +1,30 @@
-name: Size Label
-
-on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-
+name: Size label
+on: pull_request_target
 jobs:
-  analyze:
+  size-label:
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout code
+      - name: Size label
         uses: actions/checkout@v2
-        
-      - name: Install Node.js
-        uses: actions/setup-node@v2
         with:
-          node-version: 14
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Antora
-        run: npx antora antora-playbook.yml
-        
-      - name: Analyze changes
-        id: changes
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Calculate size
         run: |
-          SIZE=$(git diff --no-color --numstat origin/main...HEAD -- _site | awk '{ sum += $1 } END { printf "%.0f", sum }')
-          echo "::set-output name=size_changes::$SIZE"
-        
-  label:
-    needs: analyze
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Set PR label
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const sizeChanges = parseInt(process.env.SIZE_CHANGES);
-            const context = github.context.payload.pull_request;
-            const owner = context.base.repo.owner.login;
-            const repo = context.base.repo.name;
-            const pull_number = context.number;
-            let labelName = '';
-            
-            if (sizeChanges < 10) {
-              labelName = 'Size: XS';
-            } else if (sizeChanges < 50) {
-              labelName = 'Size: S';
-            } else if (sizeChanges < 100) {
-              labelName = 'Size: M';
-            } else if (sizeChanges < 500) {
-              labelName = 'Size: XL';
-            } else {
-              labelName = 'Size: XXL';
-            }
-            
-            github.issues.addLabels({
-              owner: owner,
-              repo: repo,
-              issue_number: pull_number,
-              labels: [labelName]
-            });
+          git fetch --update-shallow
+          git diff --stat HEAD~1
+          size=$(cat .git/FETCH_HEAD | wc -l)
+      - name: Add label
+        run: |
+          if [ $size -gt 100 ]; then
+            echo "Adding size: L"
+            hub label add ${{ github.head_repo.full_name }} ${{ github.head_ref }} "size: L"
+          elif [ $size -gt 30 ]; then
+            echo "Adding size: M"
+            hub label add ${{ github.head_repo.full_name }} ${{ github.head_ref }} "size: M"
+          else
+            echo "Adding size: S"
+            hub label add ${{ github.head_repo.full_name }} ${{ github.head_ref }} "size: S"
+          fi
